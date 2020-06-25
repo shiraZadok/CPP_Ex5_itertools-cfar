@@ -1,7 +1,3 @@
-//
-// Created by shira on 18/06/2020.
-//
-
 #ifndef EX5A_RANGE_HPP
 #define EX5A_RANGE_HPP
 

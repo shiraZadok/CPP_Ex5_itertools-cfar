@@ -1,79 +1,76 @@
-//
-// Created by shira on 18/06/2020.
-//
+#ifndef CPPEX5_ITERTOOLS_ACCUMULATE_HPP
+#define CPPEX5_ITERTOOLS_ACCUMULATE_HPP
 
-#pragma once
-#include <iostream>
-#include <vector>
-#include <iterator>
-
-namespace itertools {
-    typedef struct {
+namespace itertools{
+    typedef struct{
         template <typename T>
-        auto operator()(const T& x , const T& y) const{
-            return x+y;
+        T operator ()(T a, T b) const{
+            return a+b;
         }
+    } plus;
 
-    }add;
-
-    template<class T,class FUNC = add>
-    class accumulate {
-        const  T& tank;
-        const FUNC& function;
+    template <typename CONT, typename  FUNC = plus>
+    class accumulate{
+        CONT& _container;
+        FUNC _function;
+        typedef typename CONT::value_type value_type;
     public:
-
-        accumulate(const T& con, const FUNC& f= add() ) : tank(con),function(f){}
+        explicit accumulate(CONT& container, FUNC func = plus())
+                : _container(container), _function(func){}
 
         class iterator{
-            decltype(tank.begin()) iter;
-            typename std::decay<decltype(*(tank.begin()))>::type sum;
-            const accumulate& acc;
-
-
+            typename CONT::value_type _data;
+            typename CONT::iterator _iter;
+            typename CONT::iterator _end;
+            FUNC _function;
         public:
-            iterator(decltype(tank.begin()) curr,const accumulate& acc): iter(curr),acc(acc) {
-                if (curr != acc.tank.end())sum = *curr;
-            }
-
-            iterator& operator++(){
-                ++iter;
-                if(iter==acc.tank.end())return *this;
-                sum=acc.function(sum,*iter);
+            explicit iterator(typename CONT::iterator iter, typename CONT::iterator end, FUNC func)
+                    : _iter(iter), _end(end), _function(func){
+                if(_iter != _end)
+                    _data = *iter;
+            };
+            iterator(const iterator& other) = default;
+            iterator& operator=(const iterator& other){
+                if(this != &other) {
+                    this->_data = other._data;
+                    this->_iter = other._iter;
+                    this->_end = other._end;
+                    this->_function = other._function;
+                }
+                return *this;
+            };
+            iterator& operator ++(){
+                ++_iter;
+                if(_iter != _end) // TODO irrelevant?
+                    _data = _function(_data, *_iter);
                 return *this;
             }
-
-            const iterator operator++(int){
-                iterator temp = *this;
-                sum=acc.function(sum,*(iter++));
-                return temp;
+            iterator operator ++(int){
+                iterator tmp = *this;
+                ++(*this);
+                return tmp;
+            }
+            bool operator ==(const iterator& other) {
+                return (_iter == other._iter);
+            }
+            bool operator !=(const iterator& other) {
+                return (_iter != other._iter);
             }
 
-            bool operator==(const iterator &it) const {
-                return iter==it.iter;
+            auto operator *(){
+                return _data;
             }
-
-            bool operator!=(const iterator &it) const {
-                return !(iter==it.iter);
-            }
-
-            auto operator*(){
-                return sum;
-            }
-
-            iterator& operator=(const iterator &temp_iter)
-            {
-                return *this;
-            }
-
         };
 
-        iterator begin() const {
-            return iterator(tank.begin(),*this);
 
+        iterator begin(){
+            return iterator(_container.begin(), _container.end(), _function);
         }
-        iterator end() const {
-            return iterator(tank.end(),*this);
+        iterator end(){
+            return iterator(_container.end(), _container.end(), _function);
         }
+
     };
-
 }
+
+#endif //CPPEX5_ITERTOOLS_ACCUMULATE_HPP

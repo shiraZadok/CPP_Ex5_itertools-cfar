@@ -1,61 +1,68 @@
-//
-// Created by shira on 18/06/2020.
-//
-
-#ifndef EX5A_FILTERFALSE_HPP
-#define EX5A_FILTERFALSE_HPP
+#ifndef CPPEX5_FILTERFALSE_HPP
+#define CPPEX5_FILTERFALSE_HPP
 
 #include <iostream>
-#include <string>
-using namespace std;
+#include <vector>
 
 namespace itertools{
-    template <typename condi, typename cont>
-    class filterfalse
-    {
-    private:
-        cont container;
-        condi condition;
+    template<typename FUNC, typename CONT>
+    class filterfalse {
+        FUNC _f;
+        CONT& _container;
+        typedef typename CONT::value_type value_type;
+
     public:
-        filterfalse(condi co, cont c):container(c),condition(co){}
+        filterfalse(FUNC f, CONT& container): _f(f), _container(container){}
 
-        class iterator {
-            typename cont::iterator start_it;
-            typename cont::iterator end_it;
-            condi condition;
+        class iterator{
+            typename CONT::iterator _iter;
+            typename CONT::iterator _end;
+            FUNC _f;
         public:
-            iterator(typename cont::iterator s_it,typename cont::iterator e_it,condi co):
-                    start_it(s_it),end_it(e_it), condition(co){}
+            explicit iterator(typename CONT::iterator iter, typename CONT::iterator end, FUNC f)
+                    : _iter(iter), _end(end), _f(f){
 
-            decltype(*(container.begin())) operator*()  {
-                if(condition(*start_it))
-                    ++(*this);
-                return *start_it;
+                while (_iter != _end && _f(*_iter))
+                    ++_iter;
             }
+            iterator(const iterator& other) = default;
 
-            iterator& operator++() {
-                do {start_it++;}
-                while(start_it!= end_it && condition(*start_it));
+            iterator& operator=(const iterator& other){
+                if(this != &other) {
+                    this->_iter = other._iter;
+                    this->_end = other._end;
+                    this->_f = other._f;
+                }
+                return *this;
+            };
+            iterator& operator ++(){
+                do{
+                    ++_iter;
+                } while (_iter != _end && _f(*_iter));
                 return *this;
             }
-
-            bool operator==(const iterator& other) const {
-                return start_it == other.start_it;
+            iterator operator ++(int){
+                iterator tmp = *this;
+                ++(*this);
+                return tmp;
+            }
+            bool operator ==(const iterator& other) {
+                return (_iter == other._iter);
+            }
+            bool operator !=(const iterator& other) {
+                return (_iter != other._iter);
+            }
+            value_type operator *(){
+                return *_iter;
             }
 
-            bool operator!=(const iterator& other) const {
-                return start_it != other.start_it;
-            }
         };
-
-        iterator begin() {
-            return iterator{container.begin(),container.end(),condition};
+        iterator begin(){
+            return iterator(_container.begin(), _container.end(), _f);
         }
-
-        iterator end() {
-            return iterator{container.end(),container.end(),condition};
+        iterator end(){
+            return iterator(_container.end(), _container.end(), _f);
         }
     };
 }
-
-#endif //EX5A_FILTERFALSE_HPP
+#endif //CPPEX5_FILTERFALSE_HPP
