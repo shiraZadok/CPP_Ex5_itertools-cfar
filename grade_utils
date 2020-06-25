@@ -20,13 +20,13 @@ swap() {
 	fi
 }
 
-# A function that echoes and executes a command.
+# A _function that echoes and executes a command.
 call() { 
 	echo "! ${@/eval/}" 
 	$@
 }
 
-# A function that echoes and executes a command.
+# A _function that echoes and executes a command.
 # If it fails, it sets grade=0.
 # If it succeeds, it sets grade=100.
 grade_command() { 
@@ -40,7 +40,7 @@ grade_command() {
 	fi
 }
 
-# A function that echoes and executes a command.
+# A _function that echoes and executes a command.
 # If it fails, it sets grade=0.
 # If it succeeds, it sets grade=[last line of output]
 grade_program() { 

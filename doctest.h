@@ -2672,7 +2672,7 @@ DOCTEST_MSVC_SUPPRESS_WARNING_PUSH
 DOCTEST_MSVC_SUPPRESS_WARNING(4616) // invalid compiler warning
 DOCTEST_MSVC_SUPPRESS_WARNING(4619) // invalid compiler warning
 DOCTEST_MSVC_SUPPRESS_WARNING(4996) // The compiler encountered a deprecated declaration
-DOCTEST_MSVC_SUPPRESS_WARNING(4267) // 'var' : conversion from 'x' to 'y', possible loss of data
+DOCTEST_MSVC_SUPPRESS_WARNING(4267) // 'var' : conversion from 'x' to 'y', possible loss of _data
 DOCTEST_MSVC_SUPPRESS_WARNING(4706) // assignment within conditional expression
 DOCTEST_MSVC_SUPPRESS_WARNING(4512) // 'class' : assignment operator could not be generated
 DOCTEST_MSVC_SUPPRESS_WARNING(4127) // conditional expression is constant
@@ -2826,7 +2826,7 @@ namespace {
 
         static Arch which() {
             int x = 1;
-            // casting any data pointer to char* is allowed
+            // casting any _data pointer to char* is allowed
             auto ptr = reinterpret_cast<char*>(&x);
             if(*ptr)
                 return Little;
@@ -2919,7 +2919,7 @@ typedef timer_large_integer::type ticks_t;
         ticks_t m_ticks = 0;
     };
 
-    // this holds both parameters from the command line and runtime data for tests
+    // this holds both parameters from the command line and runtime _data for tests
     struct ContextState : ContextOptions, TestRunStats, CurrentTestCaseStats
     {
         std::atomic<int> numAssertsCurrentTest_atomic;
@@ -3076,14 +3076,14 @@ String& String::operator+=(const String& other) {
         } else {
             // alloc new chunk
             char* temp = new char[total_size + 1];
-            // copy current data to new location before writing in the union
+            // copy current _data to new location before writing in the union
             memcpy(temp, buf, my_old_size); // skip the +1 ('\0') for speed
-            // update data in union
+            // update _data in union
             setOnHeap();
             data.size     = total_size;
             data.capacity = data.size + 1;
             data.ptr      = temp;
-            // transfer the rest of the data
+            // transfer the rest of the _data
             memcpy(data.ptr + my_old_size, other.c_str(), other_size + 1);
         }
     } else {
@@ -3098,14 +3098,14 @@ String& String::operator+=(const String& other) {
                 data.capacity = total_size + 1;
             // alloc new chunk
             char* temp = new char[data.capacity];
-            // copy current data to new location before releasing it
+            // copy current _data to new location before releasing it
             memcpy(temp, data.ptr, my_old_size); // skip the +1 ('\0') for speed
             // release old chunk
             delete[] data.ptr;
             // update the rest of the union members
             data.size = total_size;
             data.ptr  = temp;
-            // transfer the rest of the data
+            // transfer the rest of the _data
             memcpy(data.ptr + my_old_size, other.c_str(), other_size + 1);
         }
     }
@@ -4449,7 +4449,7 @@ namespace {
                     hexEscapeChar(os, c);
                     break;
                 }
-                // The header is valid, check data
+                // The header is valid, check _data
                 // The next encBytes bytes must together be a valid utf-8
                 // This means: bitpattern 10XX XXXX and the extracted value is sane (ish)
                 bool valid = true;
